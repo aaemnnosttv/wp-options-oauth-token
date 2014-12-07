@@ -1,0 +1,14 @@
+{
+    "name": "aaemnnosttv/wp-options-oauth-token",
+    "description": "WP_Options OAuth Token Storage Class for Lusitanian/PHPoAuthLib",
+    "authors": [
+        {
+            "name": "Evan Mattson",
+            "email": "me@aaemnnost.tv"
+        }
+    ],
+    "require": {},
+    "autoload": {
+    	"classmap": ["src/"]
+    }
+}
