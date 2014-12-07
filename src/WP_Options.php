@@ -26,6 +26,8 @@ class WP_Options implements TokenStorageInterface
     {
         $this->key = $key;
         $this->stateKey = $stateKey;
+        $this->keyChain = "_keychain_$key";
+        $this->stateChain = "_statechain_$state";
     }
 
     /**
@@ -47,6 +49,7 @@ class WP_Options implements TokenStorageInterface
     {
         // (over)write the token
     	update_option("{$this->key}_{$service}", $token);
+        $this->addToChain($service, $this->keyChain);
 
         // allow chaining
         return $this;
@@ -66,6 +69,7 @@ class WP_Options implements TokenStorageInterface
     public function clearToken($service)
     {
         delete_option("{$this->key}_{$service}");
+        $this->clearFromChain($service, $this->keyChain);
 
         // allow chaining
         return $this;
@@ -76,9 +80,11 @@ class WP_Options implements TokenStorageInterface
      */
     public function clearAllTokens()
     {
-        // clear from db..
-        // 
-        // 
+        if ( $keychain = get_option($this->keyChain) )
+        {
+            foreach ($keychain as $key)
+                delete_option($key);
+        }
 
         // allow chaining
         return $this;
@@ -103,6 +109,7 @@ class WP_Options implements TokenStorageInterface
     {
         // (over)write the token
     	update_option("{$this->stateKey}_{$service}", $state);
+        $this->addToChain($service, $this->stateChain);
 
         // allow chaining
         return $this;
@@ -122,6 +129,7 @@ class WP_Options implements TokenStorageInterface
     public function clearAuthorizationState($service)
     {
         delete_option("{$this->stateKey}_{$service}");
+        $this->clearFromChain($service, $this->stateChain);
 
         // allow chaining
         return $this;
@@ -132,9 +140,11 @@ class WP_Options implements TokenStorageInterface
      */
     public function clearAllAuthorizationStates()
     {
-        // clear from db..
-        // 
-        // 
+        if ( $statechain = get_option($this->stateChain) )
+        {
+            foreach ($statechain as $stateKey)
+                delete_option($stateKey);
+        }
 
         // allow chaining
         return $this;
@@ -146,5 +156,28 @@ class WP_Options implements TokenStorageInterface
     public function getKey()
     {
         return $this->key;
+    }
+
+    protected function addToChain($key, $collection)
+    {
+        $chain = get_option($collection, array());
+
+        if ( ! in_array($key, $chain) )
+        {
+            $chain[] = $key;
+            update_option($collection, $chain);
+        }
+    }
+
+    protected function clearFromChain($key, $collection)
+    {
+        $chain = get_option($collection, array());
+
+        if ( in_array($key, $chain) )
+        {
+            $i = array_search($key, $chain);
+            unset($chain[ $i ]);
+            update_option($collection, $chain);
+        }
     }
 }
