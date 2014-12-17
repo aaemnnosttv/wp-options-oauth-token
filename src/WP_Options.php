@@ -27,7 +27,7 @@ class WP_Options implements TokenStorageInterface
         $this->key = $key;
         $this->stateKey = $stateKey;
         $this->keyChain = "_keychain_$key";
-        $this->stateChain = "_statechain_$state";
+        $this->stateChain = "_statechain_$stateKey";
     }
 
     /**
